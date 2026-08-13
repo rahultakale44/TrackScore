@@ -1,3 +1,9 @@
+from .court_line_detector import (
+    CourtLineConfig,
+    CourtLineDetectionError,
+    CourtLineDetector,
+)
+
 from .frame_extractor import (
     FrameExtractionError,
     FrameExtractor,
@@ -23,4 +29,7 @@ __all__ = [
     "FramePreprocessor",
     "FramePreprocessingError",
     "FrameQualityConfig",
+    "CourtLineDetector",
+    "CourtLineDetectionError",
+    "CourtLineConfig",
 ]
