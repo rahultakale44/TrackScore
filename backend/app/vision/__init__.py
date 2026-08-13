@@ -27,6 +27,12 @@ from .frame_preprocessor import (
     FrameQualityConfig,
 )
 
+from .player_detector import (
+    PlayerDetectionError,
+    PlayerDetector,
+    PlayerDetectorConfig,
+)
+
 from .video_loader import (
     VideoLoader,
     VideoLoaderError,
@@ -55,4 +61,8 @@ __all__ = [
     "CourtHomography",
     "CourtHomographyError",
     "HomographyCalibration",
+
+    "PlayerDetector",
+    "PlayerDetectionError",
+    "PlayerDetectorConfig",
 ]
