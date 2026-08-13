@@ -4,6 +4,12 @@ from .court_geometry import (
     TennisCourtDimensions,
 )
 
+from .court_homography import (
+    CourtHomography,
+    CourtHomographyError,
+    HomographyCalibration,
+)
+
 from .court_line_detector import (
     CourtLineConfig,
     CourtLineDetectionError,
@@ -45,4 +51,8 @@ __all__ = [
     "CourtGeometry",
     "CourtGeometryError",
     "TennisCourtDimensions",
+
+    "CourtHomography",
+    "CourtHomographyError",
+    "HomographyCalibration",
 ]
