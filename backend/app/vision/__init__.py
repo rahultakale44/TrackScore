@@ -1,3 +1,9 @@
+from .court_geometry import (
+    CourtGeometry,
+    CourtGeometryError,
+    TennisCourtDimensions,
+)
+
 from .court_line_detector import (
     CourtLineConfig,
     CourtLineDetectionError,
@@ -24,12 +30,19 @@ from .video_loader import (
 __all__ = [
     "VideoLoader",
     "VideoLoaderError",
+
     "FrameExtractor",
     "FrameExtractionError",
+
     "FramePreprocessor",
     "FramePreprocessingError",
     "FrameQualityConfig",
+
     "CourtLineDetector",
     "CourtLineDetectionError",
     "CourtLineConfig",
+
+    "CourtGeometry",
+    "CourtGeometryError",
+    "TennisCourtDimensions",
 ]
