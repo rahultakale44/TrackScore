@@ -1,0 +1,41 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Generated outputs
+outputs/*
+!outputs/.gitkeep
+
+# Raw datasets/videos
+data/raw/*
+!data/raw/.gitkeep
+
+# Sample videos
+samples/*
+!samples/.gitkeep
+
+# ML model weights
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

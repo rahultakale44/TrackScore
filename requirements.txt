@@ -10,3 +10,4 @@ torchvision
 ultralytics
 python-multipart
 pydantic
+pytest
