@@ -33,6 +33,12 @@ from .player_detector import (
     PlayerDetectorConfig,
 )
 
+from .player_tracker import (
+    PlayerTracker,
+    PlayerTrackerConfig,
+    PlayerTrackingError,
+)
+
 from .video_loader import (
     VideoLoader,
     VideoLoaderError,
@@ -65,4 +71,8 @@ __all__ = [
     "PlayerDetector",
     "PlayerDetectionError",
     "PlayerDetectorConfig",
+
+    "PlayerTracker",
+    "PlayerTrackerConfig",
+    "PlayerTrackingError",
 ]
