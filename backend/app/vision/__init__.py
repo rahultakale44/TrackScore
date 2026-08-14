@@ -4,6 +4,12 @@ from .ball_detector import (
     BallDetectorConfig,
 )
 
+from .ball_tracker import (
+    BallTracker,
+    BallTrackerConfig,
+    BallTrackingError,
+)
+
 from .court_geometry import (
     CourtGeometry,
     CourtGeometryError,
@@ -85,4 +91,8 @@ __all__ = [
     "BallDetector",
     "BallDetectionError",
     "BallDetectorConfig",
+
+    "BallTracker",
+    "BallTrackerConfig",
+    "BallTrackingError",
 ]
