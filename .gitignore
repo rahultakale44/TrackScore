@@ -42,11 +42,8 @@ models/**/*.onnx
 models/**/*.pkl
 !models/**/.gitkeep
 
-# Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
+# Frontend (deprecated - CLI-only system)
+frontend/
 
 # Logs
 *.log

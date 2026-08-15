@@ -1,8 +1,8 @@
 # TrackScore
 
-**Tennis Video Analytics Platform** powered by Machine Learning and Computer Vision
+**CLI Tennis Video Analytics** powered by Machine Learning and Computer Vision
 
-TrackScore is an end-to-end system for analyzing tennis match videos, providing automated player and ball tracking, bounce detection, shot classification, and real-time scoring overlays. Built with FastAPI, React, and YOLO11, it processes uploaded videos to generate annotated match footage with comprehensive analytics.
+TrackScore is a command-line Python system for analyzing tennis match videos, providing automated player and ball tracking, bounce detection, shot classification, and real-time scoring overlays. Built with OpenCV and YOLO11, it processes videos directly from the command line to generate annotated match footage with comprehensive analytics.
 
 ---
 
@@ -24,6 +24,29 @@ TrackScore automates tennis match analysis by:
 - Shot classifier requires labeled training data; demo data is synthetic and not representative of production accuracy
 - This is a portfolio/research project, **not a certified electronic line-calling system**
 - Accuracy varies significantly with video quality, camera angle, and lighting conditions
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Basic usage
+python trackscore.py samples/tennis_match.mp4
+
+# Process first 10 seconds only
+python trackscore.py samples/tennis_match.mp4 --max-seconds 10
+
+# Disable preview window
+python trackscore.py samples/tennis_match.mp4 --no-preview
+
+# Custom output location
+python trackscore.py video.mp4 --output outputs/my_analysis.mp4
+```
+
+**Output:**
+- `outputs/final/trackscore_analysis.mp4` - Annotated video with overlays
+- `outputs/final/analytics.json` - Complete frame-by-frame analytics
+- `outputs/final/summary.json` - Processing summary and statistics
 
 ---
 
@@ -52,11 +75,7 @@ TrackScore automates tennis match analysis by:
 - **Trajectory Visualization**: 30-frame ball trajectory tail with predicted vs detected distinction
 - **Event Annotations**: BOUNCE, IN, OUT, SHOT, RALLY overlays with fade effects
 - **Resolution-Adaptive**: Automatic font and element scaling based on video resolution
-
-### Web Application
-- **React Frontend**: Modern SPA with video upload, real-time processing status, and analytics dashboard
-- **FastAPI Backend**: Async job processing with RESTful API endpoints
-- **Real-Time Progress**: WebSocket-style polling for job status and progress tracking
+- **Live Preview**: OpenCV window during processing (press 'q' to quit)
 
 ---
 
@@ -135,19 +154,11 @@ graph TB
 
 ```
 TrackScore/
+├── trackscore.py             # Main CLI entry point
 ├── backend/
 │   └── app/
-│       ├── api/              # FastAPI application
-│       │   ├── routes/       # API endpoints (health, videos, analysis)
-│       │   ├── main.py       # FastAPI app factory
-│       │   ├── models.py     # Pydantic models
-│       │   └── job_manager.py # Async job processing
-│       ├── core/             # Configuration
-│       │   └── config.py     # Centralized settings
 │       ├── vision/           # Computer vision modules
 │       │   ├── video_loader.py
-│       │   ├── frame_extractor.py
-│       │   ├── frame_preprocessor.py
 │       │   ├── player_detector.py
 │       │   ├── ball_detector.py
 │       │   ├── player_tracker.py
@@ -155,7 +166,6 @@ TrackScore/
 │       │   ├── court_line_detector.py
 │       │   ├── court_homography.py
 │       │   ├── court_geometry.py
-│       │   ├── video_pipeline.py
 │       │   └── video_renderer.py
 │       ├── analytics/        # Analytics modules
 │       │   ├── ball_trajectory_analyzer.py
@@ -165,63 +175,28 @@ TrackScore/
 │       ├── ml/               # Machine learning
 │       │   ├── shot_feature_extractor.py
 │       │   └── shot_classifier.py
-│       └── scoring/          # Tennis scoring
-│           └── tennis_scoring.py
-├── frontend/                 # React application
-│   ├── src/
-│   │   ├── components/       # React components
-│   │   │   ├── Home.jsx
-│   │   │   ├── UploadPage.jsx
-│   │   │   ├── ProcessingPage.jsx
-│   │   │   └── DashboardPage.jsx
-│   │   ├── services/
-│   │   │   └── api.js        # API client
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-├── tests/                    # Test suite
-│   ├── test_api.py           # API integration tests
-│   ├── test_integration.py   # End-to-end tests
-│   ├── test_*_detector.py    # Vision module tests
-│   ├── test_*_analyzer.py    # Analytics tests
-│   └── ...                   # 237 total tests
+│       ├── scoring/          # Tennis scoring
+│       │   └── tennis_scoring.py
+│       └── api/              # FastAPI (optional/legacy)
+├── tests/                    # Test suite (237 tests)
 ├── scripts/                  # Utility scripts
-│   ├── smoke_test.py
-│   ├── verify_setup.py
-│   └── ...
 ├── data/                     # Training/test data
 ├── models/                   # ML model weights
-├── uploads/                  # Uploaded videos
-├── outputs/                  # Processed results
-├── requirements.txt
-├── .env.example
-└── README.md
+├── samples/                  # Sample videos
+├── outputs/                  # Generated results
+└── requirements.txt
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **FastAPI** - Modern async web framework
-- **Uvicorn** - ASGI server
+- **Python 3.8+** - Core language
 - **OpenCV** - Computer vision operations
 - **Ultralytics YOLO11** - Object detection (players, ball)
 - **NumPy** - Numerical computations
 - **scikit-learn** - Machine learning (shot classification)
-- **Pandas** - Data manipulation
-- **PyTorch** - Deep learning backend for YOLO
-
-### Frontend
-- **React 18** - UI framework
-- **Vite** - Build tool and dev server
-- **Axios** - HTTP client
-- **React Router** - Client-side routing
-
-### Testing
 - **pytest** - Test framework (237 tests)
-- **FastAPI TestClient** - API testing
 
 ---
 
@@ -230,7 +205,6 @@ TrackScore/
 ### Prerequisites
 
 - **Python 3.8+**
-- **Node.js 16+** and npm
 - **Git**
 
 ### Installation
@@ -241,7 +215,7 @@ git clone <repository-url>
 cd TrackScore
 ```
 
-#### 2. Backend Setup
+#### 2. Setup Python Environment
 
 ```bash
 # Create virtual environment
@@ -257,197 +231,67 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 3. Frontend Setup
-
-```bash
-cd frontend
-npm install
-cd ..
-```
-
-#### 4. Environment Configuration
-
-**Backend** - Create `.env` in project root (optional):
-```bash
-# Copy example
-cp .env.example .env
-
-# Edit as needed
-API_HOST=0.0.0.0
-API_PORT=8000
-MAX_UPLOAD_SIZE=104857600  # 100MB
-LOG_LEVEL=INFO
-```
-
-**Frontend** - Create `.env` in `frontend/` directory (optional):
-```bash
-# Copy example
-cp frontend/.env.example frontend/.env
-
-# Edit as needed
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-#### 5. Verify Setup
+#### 3. Verify Setup
 
 ```bash
 # Run smoke tests
 python scripts/smoke_test.py
 
-# Run setup verification
-python scripts/verify_setup.py
+# Run a quick test
+python trackscore.py samples/tennis_match.mp4 --max-seconds 3 --no-preview
 ```
 
 ---
 
-## ▶️ Running the Application
+## ▶️ Usage
 
-### Start Backend
+### Basic Command
 
 ```bash
-# Development mode with auto-reload
-python -m uvicorn backend.app.api.main:app --reload
-
-# Production mode
-python -m uvicorn backend.app.api.main:app --host 0.0.0.0 --port 8000
+python trackscore.py samples/tennis_match.mp4
 ```
 
-Backend will be available at `http://localhost:8000`
+This will:
+1. Load and analyze the video
+2. Show live annotated preview (press 'q' to quit)
+3. Generate annotated video: `outputs/final/trackscore_analysis.mp4`
+4. Generate analytics: `outputs/final/analytics.json`
+5. Generate summary: `outputs/final/summary.json`
 
-API documentation: `http://localhost:8000/docs`
-
-### Start Frontend
+### Command Line Options
 
 ```bash
-cd frontend
+# Process only first N seconds (useful for testing)
+python trackscore.py video.mp4 --max-seconds 10
 
-# Development mode
-npm run dev
+# Disable live preview window
+python trackscore.py video.mp4 --no-preview
 
-# Build for production
-npm run build
+# Specify output location
+python trackscore.py video.mp4 --output results/my_analysis.mp4
 
-# Preview production build
-npm run preview
+# Process every Nth frame (faster, lower quality)
+python trackscore.py video.mp4 --frame-stride 2
+
+# Set court type for bounce detection
+python trackscore.py video.mp4 --court-type doubles
 ```
 
-Frontend will be available at `http://localhost:5173` (dev mode)
+### Full Options
 
----
-
-## 📹 Using TrackScore
-
-### 1. Upload Video
-- Navigate to the web interface
-- Click "Upload Video" 
-- Select a tennis match video (MP4, MOV, or AVI)
-- Maximum file size: 100MB
-- Supported formats: MP4, MOV, AVI
-
-### 2. Process Video
-- Click "Start Analysis"
-- Monitor real-time processing progress
-- Processing stages:
-  - Video metadata extraction
-  - Frame extraction and preprocessing
-  - Player and ball detection
-  - Trajectory and bounce analysis
-  - Speed estimation
-  - Shot classification
-  - Match scoring
-  - Video rendering with overlays
-
-### 3. View Results
-- Automatic redirect to analytics dashboard
-- View video information (resolution, FPS, duration)
-- Review detection statistics
-- See match scoreboard (if scoring data available)
-- Download annotated video with overlays
-
----
-
-## 🔌 API Endpoints
-
-### Health Check
 ```
-GET /api/health
-```
-Returns service status.
+python trackscore.py VIDEO [OPTIONS]
 
-### Video Upload
-```
-POST /api/videos/upload
-Content-Type: multipart/form-data
+Arguments:
+  VIDEO                    Path to input tennis video (MP4, MOV, AVI)
 
-Body: file (video file)
-
-Response: {
-  "video_id": "uuid",
-  "filename": "string",
-  "size_bytes": number,
-  "upload_path": "string"
-}
-```
-
-### Start Analysis
-```
-POST /api/analysis/start/{video_id}
-Body (optional): {
-  "max_frames": number | null
-}
-
-Response: {
-  "job_id": "uuid",
-  "video_id": "string",
-  "status": "queued"
-}
-```
-
-### Check Status
-```
-GET /api/analysis/status/{job_id}
-
-Response: {
-  "job_id": "string",
-  "video_id": "string",
-  "status": "queued" | "processing" | "completed" | "failed",
-  "progress_percentage": number,
-  "message": "string",
-  "error": "string" | null
-}
-```
-
-### Get Results
-```
-GET /api/analysis/result/{job_id}
-
-Response: {
-  "job_id": "string",
-  "video_id": "string",
-  "status": "completed",
-  "summary": { /* analysis summary */ },
-  "warnings": ["string"]
-}
-```
-
-### Get Metadata
-```
-GET /api/analysis/metadata/{job_id}
-
-Response: {
-  "job_id": "string",
-  "video_id": "string",
-  "status": "completed",
-  "metadata": { /* full analytics */ },
-  "warnings": ["string"]
-}
-```
-
-### Download Video
-```
-GET /api/analysis/video/{job_id}
-
-Response: video/mp4 file
+Options:
+  --output PATH            Output video path (default: outputs/final/trackscore_analysis.mp4)
+  --max-seconds FLOAT      Process only first N seconds
+  --no-preview             Disable live preview window
+  --frame-stride INT       Process every Nth frame (default: 1)
+  --court-type TYPE        Court type: singles or doubles (default: singles)
+  -h, --help               Show help message
 ```
 
 ---
@@ -497,9 +341,9 @@ pytest --cov=backend
 
 ### Frontend Tests
 ```bash
-cd frontend
-npm run lint
-npm run build
+# Note: Frontend has been deprecated in favor of CLI-first approach
+# Legacy FastAPI tests remain for reference
+pytest tests/test_api.py tests/test_integration.py
 ```
 
 **Test Coverage:**
