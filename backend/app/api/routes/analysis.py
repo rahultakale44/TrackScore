@@ -2,6 +2,7 @@
 Analysis job endpoints.
 """
 
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -16,11 +17,13 @@ from backend.app.api.models import (
     AnalysisStatusResponse,
     JobStatus,
 )
+from backend.app.core.config import Config
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Upload directory
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Config.UPLOAD_DIR
 
 
 @router.post("/start/{video_id}", response_model=AnalysisStartResponse, status_code=status.HTTP_202_ACCEPTED)
@@ -43,19 +46,24 @@ async def start_analysis(
     """
     job_manager = request.app.state.job_manager
     
+    logger.info(f"Starting analysis for video: {video_id}")
+    
     # Find the video file
     video_path = None
-    for extension in [".mp4", ".mov", ".avi"]:
+    for extension in Config.ALLOWED_VIDEO_EXTENSIONS:
         candidate = UPLOAD_DIR / f"{video_id}{extension}"
         if candidate.exists():
             video_path = candidate
             break
     
     if not video_path:
+        logger.error(f"Video not found: {video_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Video not found: {video_id}",
         )
+    
+    logger.info(f"Found video at: {video_path}")
     
     # Extract parameters
     max_frames = None
@@ -68,6 +76,8 @@ async def start_analysis(
         video_path=str(video_path),
         max_frames=max_frames,
     )
+    
+    logger.info(f"Created job: {job_id}")
     
     # Start processing asynchronously
     job_manager.start_job_async(job_id)

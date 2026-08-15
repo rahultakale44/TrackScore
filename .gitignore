@@ -6,11 +6,13 @@ env/
 # Python cache
 __pycache__/
 *.py[cod]
+*.pyo
 .pytest_cache/
 
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # IDE
 .vscode/
@@ -20,6 +22,10 @@ __pycache__/
 outputs/*
 !outputs/.gitkeep
 
+# Uploaded videos
+uploads/*
+!uploads/.gitkeep
+
 # Raw datasets/videos
 data/raw/*
 !data/raw/.gitkeep
@@ -27,11 +33,20 @@ data/raw/*
 # Sample videos
 samples/*
 !samples/.gitkeep
+!samples/tennis_match.mp4
 
 # ML model weights
 models/**/*.pt
 models/**/*.pth
 models/**/*.onnx
+models/**/*.pkl
+!models/**/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
 
 # Logs
 *.log
@@ -39,3 +54,10 @@ models/**/*.onnx
 # OS files
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

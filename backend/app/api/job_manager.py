@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import traceback
 import uuid
 from datetime import datetime, timezone
@@ -13,6 +14,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from backend.app.api.models import JobStatus
+from backend.app.core.config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class JobManager:
@@ -157,9 +161,12 @@ class JobManager:
         """
         job = self.get_job(job_id)
         if not job:
+            logger.error(f"Job not found: {job_id}")
             return
         
         try:
+            logger.info(f"Starting job {job_id} for video {job['video_id']}")
+            
             self.update_job_status(
                 job_id,
                 JobStatus.PROCESSING,
@@ -174,8 +181,9 @@ class JobManager:
             max_frames = job["max_frames"]
             
             # Create output directory for this job
-            output_dir = Path("outputs") / "jobs" / job_id
+            output_dir = Config.OUTPUT_DIR / "jobs" / job_id
             output_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Created output directory: {output_dir}")
             
             self.update_job_status(
                 job_id,
@@ -197,11 +205,14 @@ class JobManager:
                 message="Processing video frames",
             )
             
+            result = None
             try:
                 result = pipeline.run(max_frames=max_frames)
+                logger.info(f"Pipeline completed for job {job_id}")
             except Exception as pipeline_error:
                 # Capture pipeline failures as warnings if we can partially recover
                 warning = f"Pipeline partial failure: {str(pipeline_error)}"
+                logger.warning(f"Job {job_id}: {warning}")
                 self.add_job_warning(job_id, warning)
                 
                 # Create a minimal result structure
@@ -234,26 +245,42 @@ class JobManager:
                 )
                 
                 from backend.app.vision.video_renderer import VideoRenderer, RendererConfig
+                from backend.app.vision.video_loader import VideoLoader
+                
+                # Load source video metadata
+                loader = VideoLoader(video_path)
+                video_metadata = loader.get_metadata()
+                fps = video_metadata.get("fps", 30.0)
+                width = video_metadata.get("width", 1920)
+                height = video_metadata.get("height", 1080)
                 
                 renderer_config = RendererConfig(
-                    output_path=str(output_dir / "annotated_video.mp4")
+                    output_path=str(output_dir / "annotated_video.mp4"),
+                    fps=fps,
+                    frame_width=width,
+                    frame_height=height,
                 )
                 renderer = VideoRenderer(renderer_config)
                 
                 # Prepare analytics data for renderer
-                analytics_for_renderer = {
-                    "frames": [],
-                }
+                analytics_for_renderer = self._prepare_renderer_analytics(result)
                 
-                # Map detections to frames (simplified mapping)
-                # In a full implementation, this would align detections with actual frame numbers
+                # Render the video
                 annotated_video_path = renderer.render_video(
                     video_path,
                     analytics_for_renderer,
                 )
                 
+                if annotated_video_path and Path(annotated_video_path).exists():
+                    logger.info(f"Annotated video created: {annotated_video_path}")
+                else:
+                    warning = "Annotated video was not created"
+                    logger.warning(f"Job {job_id}: {warning}")
+                    self.add_job_warning(job_id, warning)
+                
             except Exception as render_error:
                 warning = f"Video rendering failed: {str(render_error)}"
+                logger.error(f"Job {job_id}: {warning}", exc_info=True)
                 self.add_job_warning(job_id, warning)
                 # Continue without annotated video
             
@@ -261,9 +288,9 @@ class JobManager:
             metadata = {
                 "job_id": job_id,
                 "video_id": job["video_id"],
-                "video_path": video_path,
-                "annotated_video_path": annotated_video_path,
-                "output_dir": str(output_dir),
+                "video_path": str(Path(video_path).absolute()),
+                "annotated_video_path": str(Path(annotated_video_path).absolute()) if annotated_video_path else None,
+                "output_dir": str(output_dir.absolute()),
                 "max_frames": max_frames,
                 "pipeline_result": result,
                 "processed_at": datetime.now(timezone.utc).isoformat(),
@@ -279,8 +306,11 @@ class JobManager:
                 message="Analysis completed successfully",
             )
             
+            logger.info(f"Job {job_id} completed successfully")
+            
         except Exception as error:
             error_trace = traceback.format_exc()
+            logger.error(f"Job {job_id} failed: {str(error)}\n{error_trace}")
             self.update_job_status(
                 job_id,
                 JobStatus.FAILED,
@@ -288,6 +318,40 @@ class JobManager:
                 message="Analysis failed",
                 error=f"{str(error)}\n{error_trace}",
             )
+    
+    def _prepare_renderer_analytics(self, pipeline_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Prepare analytics data for video renderer.
+        
+        Args:
+            pipeline_result: Raw pipeline output
+        
+        Returns:
+            Analytics data formatted for renderer
+        """
+        frames = pipeline_result.get("frames", [])
+        detections = pipeline_result.get("detections", {})
+        
+        # Build frame-indexed data
+        analytics_frames = []
+        
+        for frame_info in frames:
+            frame_number = frame_info.get("frame_number", 0)
+            timestamp = frame_info.get("timestamp_seconds", 0.0)
+            
+            frame_data = {
+                "frame_number": frame_number,
+                "timestamp": timestamp,
+                "players": [],
+                "ball": None,
+                "events": [],
+            }
+            
+            analytics_frames.append(frame_data)
+        
+        return {
+            "frames": analytics_frames,
+        }
     
     def _build_summary(self, pipeline_result: Dict[str, Any]) -> Dict[str, Any]:
         """

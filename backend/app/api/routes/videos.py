@@ -2,6 +2,7 @@
 Video upload endpoints.
 """
 
+import logging
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -9,17 +10,19 @@ from typing import Optional
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from backend.app.api.models import ErrorResponse, VideoUploadResponse
+from backend.app.core.config import Config
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Supported video extensions
-SUPPORTED_EXTENSIONS = {".mp4", ".mov", ".avi"}
+SUPPORTED_EXTENSIONS = set(Config.ALLOWED_VIDEO_EXTENSIONS)
 
-# Maximum file size (100 MB)
-MAX_FILE_SIZE = 100 * 1024 * 1024
+# Maximum file size
+MAX_FILE_SIZE = Config.MAX_UPLOAD_SIZE
 
 # Upload directory
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Config.UPLOAD_DIR
 
 
 def sanitize_filename(filename: str) -> str:
@@ -94,8 +97,11 @@ async def upload_video(
             detail="Filename is required",
         )
     
+    logger.info(f"Received upload request for: {file.filename}")
+    
     # Validate extension
     if not validate_extension(file.filename):
+        logger.warning(f"Unsupported extension for file: {file.filename}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unsupported file extension. Supported: {', '.join(SUPPORTED_EXTENSIONS)}",
@@ -105,8 +111,11 @@ async def upload_video(
     content = await file.read()
     file_size = len(content)
     
+    logger.info(f"File size: {file_size} bytes")
+    
     # Validate file size
     if not validate_file_size(file_size):
+        logger.warning(f"File too large: {file_size} bytes (max: {MAX_FILE_SIZE})")
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File size exceeds maximum allowed size of {MAX_FILE_SIZE} bytes",
@@ -130,15 +139,24 @@ async def upload_video(
     # Save file
     upload_path = UPLOAD_DIR / unique_filename
     
-    with open(upload_path, "wb") as f:
-        f.write(content)
-    
-    return VideoUploadResponse(
-        video_id=video_id,
-        filename=file.filename,
-        size_bytes=file_size,
-        upload_path=str(upload_path),
-    )
+    try:
+        with open(upload_path, "wb") as f:
+            f.write(content)
+        
+        logger.info(f"Saved video to: {upload_path}")
+        
+        return VideoUploadResponse(
+            video_id=video_id,
+            filename=file.filename,
+            size_bytes=file_size,
+            upload_path=str(upload_path),
+        )
+    except Exception as e:
+        logger.error(f"Failed to save video: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save video: {str(e)}",
+        )
 
 
 __all__ = ["router"]
