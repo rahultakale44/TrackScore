@@ -1,0 +1,144 @@
+"""
+Video upload endpoints.
+"""
+
+import uuid
+from pathlib import Path
+from typing import Optional
+
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
+
+from backend.app.api.models import ErrorResponse, VideoUploadResponse
+
+router = APIRouter()
+
+# Supported video extensions
+SUPPORTED_EXTENSIONS = {".mp4", ".mov", ".avi"}
+
+# Maximum file size (100 MB)
+MAX_FILE_SIZE = 100 * 1024 * 1024
+
+# Upload directory
+UPLOAD_DIR = Path("uploads")
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Sanitize filename to prevent path traversal attacks.
+    
+    Args:
+        filename: Original filename
+    
+    Returns:
+        Sanitized filename
+    """
+    # Remove any path separators
+    filename = filename.replace("/", "_").replace("\\", "_")
+    
+    # Remove any potentially dangerous characters
+    dangerous_chars = ["<", ">", ":", '"', "|", "?", "*"]
+    for char in dangerous_chars:
+        filename = filename.replace(char, "_")
+    
+    return filename
+
+
+def validate_extension(filename: str) -> bool:
+    """
+    Validate file extension.
+    
+    Args:
+        filename: Filename to validate
+    
+    Returns:
+        True if extension is supported
+    """
+    extension = Path(filename).suffix.lower()
+    return extension in SUPPORTED_EXTENSIONS
+
+
+def validate_file_size(size: int) -> bool:
+    """
+    Validate file size.
+    
+    Args:
+        size: File size in bytes
+    
+    Returns:
+        True if size is within limits
+    """
+    return 0 < size <= MAX_FILE_SIZE
+
+
+@router.post("/upload", response_model=VideoUploadResponse, status_code=status.HTTP_201_CREATED)
+async def upload_video(
+    file: UploadFile = File(..., description="Video file to upload"),
+):
+    """
+    Upload a video file for analysis.
+    
+    Validates:
+    - File extension (MP4, MOV, AVI)
+    - File size (max 100 MB)
+    
+    Returns:
+    - video_id: Unique identifier for the uploaded video
+    - filename: Original filename
+    - size_bytes: File size
+    - upload_path: Storage path
+    """
+    # Validate filename exists
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Filename is required",
+        )
+    
+    # Validate extension
+    if not validate_extension(file.filename):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file extension. Supported: {', '.join(SUPPORTED_EXTENSIONS)}",
+        )
+    
+    # Read file content
+    content = await file.read()
+    file_size = len(content)
+    
+    # Validate file size
+    if not validate_file_size(file_size):
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File size exceeds maximum allowed size of {MAX_FILE_SIZE} bytes",
+        )
+    
+    # Generate unique video ID
+    video_id = str(uuid.uuid4())
+    
+    # Sanitize filename
+    safe_filename = sanitize_filename(file.filename)
+    
+    # Get file extension
+    extension = Path(safe_filename).suffix
+    
+    # Create unique filename
+    unique_filename = f"{video_id}{extension}"
+    
+    # Ensure upload directory exists
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Save file
+    upload_path = UPLOAD_DIR / unique_filename
+    
+    with open(upload_path, "wb") as f:
+        f.write(content)
+    
+    return VideoUploadResponse(
+        video_id=video_id,
+        filename=file.filename,
+        size_bytes=file_size,
+        upload_path=str(upload_path),
+    )
+
+
+__all__ = ["router"]
