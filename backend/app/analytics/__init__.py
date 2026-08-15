@@ -1,3 +1,9 @@
+from .ball_speed_analyzer import (
+    BallSpeedAnalysisError,
+    BallSpeedAnalyzer,
+    BallSpeedConfig,
+)
+
 from .ball_trajectory_analyzer import (
     BallTrajectoryAnalysisError,
     BallTrajectoryAnalyzer,
@@ -29,4 +35,8 @@ __all__ = [
     "BounceCourtAnalyzer",
     "BounceCourtAnalysisError",
     "BounceCourtConfig",
+
+    "BallSpeedAnalyzer",
+    "BallSpeedAnalysisError",
+    "BallSpeedConfig",
 ]
