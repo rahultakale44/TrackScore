@@ -56,6 +56,12 @@ from .video_loader import (
     VideoLoaderError,
 )
 
+from .video_pipeline import (
+    VideoAnalyticsPipeline,
+    VideoPipelineConfig,
+    VideoPipelineError,
+)
+
 
 __all__ = [
     "VideoLoader",
@@ -95,4 +101,8 @@ __all__ = [
     "BallTracker",
     "BallTrackerConfig",
     "BallTrackingError",
+
+    "VideoAnalyticsPipeline",
+    "VideoPipelineConfig",
+    "VideoPipelineError",
 ]
