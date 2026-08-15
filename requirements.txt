@@ -11,3 +11,4 @@ ultralytics
 python-multipart
 pydantic
 pytest
+joblib
