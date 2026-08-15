@@ -498,3 +498,73 @@ def test_rally_result_and_event_log():
         ]
         == "Player B"
     )
+
+
+def test_match_statistics_summary():
+    engine = (
+        TennisScoringEngine()
+    )
+
+    engine.award_point("Player A")
+    engine.award_point("Player B")
+    engine.record_rally_result(
+        {
+            "winner": "Player A",
+            "rally_length": 5,
+            "shot_type": "forehand",
+        }
+    )
+
+    stats = engine.get_match_statistics()
+
+    assert (
+        stats["total_points"]
+        == 3
+    )
+
+    assert (
+        stats["players"]["Player A"]["points_won"]
+        == 2
+    )
+
+    assert (
+        stats["players"]["Player B"]["points_won"]
+        == 1
+    )
+
+    assert (
+        stats["leader"]
+        == "Player A"
+    )
+
+
+def test_player_performance_analytics():
+    engine = (
+        TennisScoringEngine()
+    )
+
+    engine.award_point("Player A")
+    engine.award_point("Player A")
+    engine.award_point("Player B")
+
+    player_stats = engine.get_player_statistics("Player A")
+    performance = engine.get_player_performance("Player B")
+
+    assert (
+        player_stats["points_won"]
+        == 2
+    )
+
+    assert (
+        performance["points_won"]
+        == 1
+    )
+
+    assert (
+        player_stats["games_won"]
+        == 0
+    )
+
+    assert (
+        "win_rate" in player_stats
+    )

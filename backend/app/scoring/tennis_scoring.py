@@ -285,6 +285,90 @@ class TennisScoringEngine:
 
         return list(self._event_log)
 
+    def _get_player_point_totals(
+        self,
+    ) -> Dict[str, int]:
+        points = {
+            "Player A": 0,
+            "Player B": 0,
+        }
+
+        for event in self._event_log:
+            if event.get("type") != "point":
+                continue
+            winner = event.get("winner")
+            if winner in points:
+                points[winner] += 1
+
+        return points
+
+    def get_match_statistics(
+        self,
+    ) -> Dict[str, Any]:
+        """
+        Return aggregate match statistics for the current match state.
+        """
+
+        point_totals = self._get_player_point_totals()
+        player_stats = {}
+
+        for player in ("Player A", "Player B"):
+            opponent = self.get_opponent(player)
+            player_points = point_totals[player]
+            opponent_points = point_totals[opponent]
+            total_points = player_points + opponent_points
+            if total_points == 0:
+                win_rate = 0.0
+            else:
+                win_rate = round(
+                    (player_points / total_points) * 100,
+                    2,
+                )
+
+            player_stats[player] = {
+                "points_won": player_points,
+                "games_won": self.games[player],
+                "sets_won": self.sets[player],
+                "win_rate": win_rate,
+                "current_leader": self.get_current_leader() == player,
+            }
+
+        return {
+            "total_points": sum(point_totals.values()),
+            "players": player_stats,
+            "leader": self.get_current_leader(),
+            "match_winner": self.match_winner,
+            "completed_sets": list(self.completed_sets),
+        }
+
+    def get_player_statistics(
+        self,
+        player: str,
+    ) -> Dict[str, Any]:
+        """
+        Return statistics for a specific player.
+        """
+
+        self._validate_player(player)
+        stats = self.get_match_statistics()["players"][player]
+        stats["player"] = player
+        return stats
+
+    def get_player_performance(
+        self,
+        player: str,
+    ) -> Dict[str, Any]:
+        """
+        Return player performance summary including score and win-rate context.
+        """
+
+        self._validate_player(player)
+        summary = self.get_player_statistics(player)
+        summary["current_score"] = self.get_state()["points"][player]
+        summary["games_score"] = self.games[player]
+        summary["sets_score"] = self.sets[player]
+        return summary
+
     def record_rally_result(
         self,
         rally_result: Dict[str, Any],
