@@ -545,6 +545,9 @@ class PlayerTracker:
         labelled: List[
             Dict[str, Any]
         ] = []
+        
+        # Track which labels are used in this frame (not historical)
+        labels_used_this_frame = set()
 
         for position, track in enumerate(
             ordered
@@ -558,43 +561,58 @@ class PlayerTracker:
                 track
             )
 
+            # If this track_id has been seen before, reuse its label
             if (
                 track_id
                 in self.track_to_player_label
             ):
-
                 label = (
                     self.track_to_player_label[
                         track_id
                     ]
                 )
+                
+                # CRITICAL FIX: If this label was already used by another track
+                # in this frame, we need to reassign
+                if label in labels_used_this_frame and label in ["Player A", "Player B"]:
+                    # This track_id had a label, but another active track is using it
+                    # Assign the other player label
+                    if label == "Player A" and "Player B" not in labels_used_this_frame:
+                        label = "Player B"
+                        self.track_to_player_label[track_id] = label
+                    elif label == "Player B" and "Player A" not in labels_used_this_frame:
+                        label = "Player A"
+                        self.track_to_player_label[track_id] = label
+                    else:
+                        # Both taken, use track ID
+                        label = f"Track {track_id}"
+                        self.track_to_player_label[track_id] = label
 
             else:
-
-                existing_labels = set(
-                    self.track_to_player_label.values()
-                )
-
+                # New track_id - assign a label
+                # Check which labels are available (not used by current active tracks)
+                
                 if (
                     "Player A"
-                    not in existing_labels
+                    not in labels_used_this_frame
                     and position == 0
                 ):
                     label = "Player A"
 
                 elif (
                     "Player B"
-                    not in existing_labels
+                    not in labels_used_this_frame
                 ):
                     label = "Player B"
 
                 elif (
                     "Player A"
-                    not in existing_labels
+                    not in labels_used_this_frame
                 ):
                     label = "Player A"
 
                 else:
+                    # Both labels taken by current frame tracks
                     label = (
                         f"Track {track_id}"
                     )
@@ -602,6 +620,9 @@ class PlayerTracker:
                 self.track_to_player_label[
                     track_id
                 ] = label
+            
+            # Mark this label as used in current frame
+            labels_used_this_frame.add(label)
 
             item[
                 "player_label"
