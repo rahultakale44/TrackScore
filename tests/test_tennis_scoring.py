@@ -461,3 +461,40 @@ def test_point_event_callbacks_fire_with_state():
         ]
         == "15"
     )
+
+
+def test_rally_result_and_event_log():
+    engine = (
+        TennisScoringEngine()
+    )
+
+    state = engine.record_rally_result(
+        {
+            "winner": "Player B",
+            "rally_length": 8,
+            "shot_type": "backhand",
+        }
+    )
+
+    assert (
+        state[
+            "points"
+        ][
+            "Player B"
+        ]
+        == "15"
+    )
+
+    assert (
+        len(
+            engine.get_event_log()
+        )
+        >= 1
+    )
+
+    assert (
+        engine.get_event_log()[-1][
+            "winner"
+        ]
+        == "Player B"
+    )

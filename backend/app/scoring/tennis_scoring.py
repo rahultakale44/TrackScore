@@ -69,6 +69,7 @@ class TennisScoringEngine:
             List[Callable[[Dict[str, Any]], None]],
         ] = defaultdict(list)
         self.event_listeners = self._event_listeners
+        self._event_log: List[Dict[str, Any]] = []
 
         self.reset_match()
 
@@ -252,6 +253,7 @@ class TennisScoringEngine:
             "state": state,
             **payload,
         }
+        self._event_log.append(event)
 
         for event_name in (
             event_type,
@@ -273,6 +275,53 @@ class TennisScoringEngine:
         """
 
         return self.get_state()
+
+    def get_event_log(
+        self,
+    ) -> List[Dict[str, Any]]:
+        """
+        Return the event log for the current match.
+        """
+
+        return list(self._event_log)
+
+    def record_rally_result(
+        self,
+        rally_result: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Record a complete rally result and convert it into the standard point award flow.
+        """
+
+        if not isinstance(rally_result, dict):
+            raise TennisScoringError(
+                "rally_result must be a dictionary."
+            )
+
+        winner = rally_result.get("winner")
+        if winner not in {"Player A", "Player B"}:
+            raise TennisScoringError(
+                "rally_result['winner'] must be 'Player A' or 'Player B'."
+            )
+
+        self._emit_event(
+            "rally_result",
+            winner=winner,
+            rally_length=rally_result.get("rally_length"),
+            shot_type=rally_result.get("shot_type"),
+            metadata=rally_result.get("metadata", {}),
+            rally=rally_result,
+        )
+
+        return self.award_point(
+            winner,
+            metadata={
+                "rally_length": rally_result.get("rally_length"),
+                "shot_type": rally_result.get("shot_type"),
+                "source": "rally_result",
+                **rally_result.get("metadata", {}),
+            },
+        )
 
     # ============================================================
     # GAME SCORE DISPLAY
