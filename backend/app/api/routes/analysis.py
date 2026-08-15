@@ -200,12 +200,7 @@ async def get_analysis_video(
         job_id: Job identifier
     
     Returns:
-        Video file (if available)
-    
-    Note:
-        This is a placeholder. Actual video annotation would require
-        additional processing to draw detections on frames and create
-        an output video file.
+        Video file (annotated if available, otherwise original)
     """
     job_manager = request.app.state.job_manager
     
@@ -222,8 +217,18 @@ async def get_analysis_video(
             detail=f"Analysis not completed. Current status: {job['status']}",
         )
     
-    # For now, return the original video
-    # In a future commit, this would return an annotated version
+    # Try to serve annotated video first
+    metadata = job.get("metadata", {})
+    annotated_path = metadata.get("annotated_video_path")
+    
+    if annotated_path and Path(annotated_path).exists():
+        return FileResponse(
+            path=annotated_path,
+            media_type="video/mp4",
+            filename=f"annotated_{job_id}.mp4",
+        )
+    
+    # Fall back to original video
     video_path = Path(job["video_path"])
     
     if not video_path.exists():

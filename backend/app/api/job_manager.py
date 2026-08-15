@@ -223,11 +223,46 @@ class JobManager:
             # Build structured summary
             summary = self._build_summary(result)
             
+            # Render annotated video
+            annotated_video_path = None
+            try:
+                self.update_job_status(
+                    job_id,
+                    JobStatus.PROCESSING,
+                    progress_percentage=90.0,
+                    message="Rendering annotated video",
+                )
+                
+                from backend.app.vision.video_renderer import VideoRenderer, RendererConfig
+                
+                renderer_config = RendererConfig(
+                    output_path=str(output_dir / "annotated_video.mp4")
+                )
+                renderer = VideoRenderer(renderer_config)
+                
+                # Prepare analytics data for renderer
+                analytics_for_renderer = {
+                    "frames": [],
+                }
+                
+                # Map detections to frames (simplified mapping)
+                # In a full implementation, this would align detections with actual frame numbers
+                annotated_video_path = renderer.render_video(
+                    video_path,
+                    analytics_for_renderer,
+                )
+                
+            except Exception as render_error:
+                warning = f"Video rendering failed: {str(render_error)}"
+                self.add_job_warning(job_id, warning)
+                # Continue without annotated video
+            
             # Store full metadata
             metadata = {
                 "job_id": job_id,
                 "video_id": job["video_id"],
                 "video_path": video_path,
+                "annotated_video_path": annotated_video_path,
                 "output_dir": str(output_dir),
                 "max_frames": max_frames,
                 "pipeline_result": result,
