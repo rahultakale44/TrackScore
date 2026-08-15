@@ -365,3 +365,99 @@ def test_point_history():
         ]
         == "winner"
     )
+
+
+def test_live_scoreboard_snapshot():
+    engine = (
+        TennisScoringEngine()
+    )
+
+    scoreboard = (
+        engine.get_live_scoreboard()
+    )
+
+    assert (
+        scoreboard[
+            "points"
+        ][
+            "Player A"
+        ]
+        == "0"
+    )
+
+    assert (
+        scoreboard[
+            "games"
+        ][
+            "Player A"
+        ]
+        == 0
+    )
+
+    assert (
+        scoreboard[
+            "sets"
+        ][
+            "Player A"
+        ]
+        == 0
+    )
+
+    assert (
+        scoreboard[
+            "leader"
+        ]
+        == "TIED"
+    )
+
+
+def test_point_event_callbacks_fire_with_state():
+    engine = (
+        TennisScoringEngine()
+    )
+    events = []
+
+    engine.add_event_listener(
+        "point",
+        lambda event: events.append(
+            event
+        ),
+    )
+
+    engine.award_point(
+        "Player A"
+    )
+
+    assert (
+        len(
+            events
+        )
+        == 1
+    )
+
+    event = events[0]
+
+    assert (
+        event[
+            "type"
+        ]
+        == "point"
+    )
+
+    assert (
+        event[
+            "winner"
+        ]
+        == "Player A"
+    )
+
+    assert (
+        event[
+            "state"
+        ][
+            "points"
+        ][
+            "Player A"
+        ]
+        == "15"
+    )

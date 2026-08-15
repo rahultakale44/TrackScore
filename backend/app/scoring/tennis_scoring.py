@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
+from typing import Any, Callable, Dict, List, Optional
 
 
 class TennisScoringError(Exception):
@@ -61,6 +63,12 @@ class TennisScoringEngine:
         )
 
         self._validate_config()
+
+        self._event_listeners: Dict[
+            str,
+            List[Callable[[Dict[str, Any]], None]],
+        ] = defaultdict(list)
+        self.event_listeners = self._event_listeners
 
         self.reset_match()
 
@@ -184,6 +192,87 @@ class TennisScoringEngine:
             if player == "Player A"
             else "Player A"
         )
+
+    def add_event_listener(
+        self,
+        event_type: str,
+        callback: Callable[[Dict[str, Any]], None],
+    ) -> None:
+        """
+        Register a callback for a scoring lifecycle event.
+        """
+
+        if not isinstance(
+            event_type,
+            str,
+        ) or not event_type.strip():
+            raise TennisScoringError(
+                "event_type must be a non-empty string."
+            )
+
+        if not callable(callback):
+            raise TennisScoringError(
+                "callback must be callable."
+            )
+
+        self._event_listeners[
+            event_type
+        ].append(callback)
+
+    def remove_event_listener(
+        self,
+        event_type: str,
+        callback: Callable[[Dict[str, Any]], None],
+    ) -> None:
+        """
+        Remove a registered callback for an event type.
+        """
+
+        if event_type not in self._event_listeners:
+            return
+
+        self._event_listeners[event_type] = [
+            listener
+            for listener in self._event_listeners[event_type]
+            if listener is not callback
+        ]
+
+    def _emit_event(
+        self,
+        event_type: str,
+        **payload: Any,
+    ) -> None:
+        state = self.get_state()
+        event = {
+            "type": event_type,
+            "timestamp": (
+                datetime.now(timezone.utc)
+                .isoformat()
+            ),
+            "state": state,
+            **payload,
+        }
+
+        for event_name in (
+            event_type,
+            "*",
+        ):
+            for listener in list(
+                self._event_listeners.get(
+                    event_name,
+                    [],
+                )
+            ):
+                listener(event)
+
+    def get_live_scoreboard(
+        self,
+    ) -> Dict[str, Any]:
+        """
+        Return the latest scoreboard snapshot for UI consumers.
+        """
+
+        return self.get_state()
 
     # ============================================================
     # GAME SCORE DISPLAY
@@ -319,6 +408,22 @@ class TennisScoringEngine:
                 game_winner
             )
 
+        self._emit_event(
+            "point",
+            player=player,
+            winner=player,
+            metadata=metadata or {},
+            game_points=dict(
+                self.game_points
+            ),
+            games=dict(
+                self.games
+            ),
+            sets=dict(
+                self.sets
+            ),
+        )
+
         return self.get_state()
 
     # ============================================================
@@ -352,8 +457,24 @@ class TennisScoringEngine:
 
         if self._should_start_tiebreak():
             self.in_tiebreak = True
-
+            self._emit_event(
+                "game",
+                player=player,
+                winner=player,
+                game_number=len(self.game_history),
+                games=dict(self.games),
+                sets=dict(self.sets),
+            )
             return
+
+        self._emit_event(
+            "game",
+            player=player,
+            winner=player,
+            game_number=len(self.game_history),
+            games=dict(self.games),
+            sets=dict(self.sets),
+        )
 
         if self._has_won_set(
             player
@@ -424,6 +545,24 @@ class TennisScoringEngine:
             >= self.config.sets_to_win_match
         ):
             self.match_winner = player
+
+        self._emit_event(
+            "set",
+            player=player,
+            winner=player,
+            set_record=dict(set_record),
+            games=dict(self.games),
+            sets=dict(self.sets),
+        )
+
+        if self.match_winner is not None:
+            self._emit_event(
+                "match",
+                player=player,
+                winner=player,
+                games=dict(self.games),
+                sets=dict(self.sets),
+            )
 
         if self.match_winner is None:
             self.reset_set()
@@ -514,6 +653,19 @@ class TennisScoringEngine:
             ] += 1
 
             self.in_tiebreak = False
+
+            self._emit_event(
+                "point",
+                player=player,
+                winner=player,
+                metadata=metadata or {},
+                tiebreak=True,
+                tiebreak_points=dict(
+                    self.tiebreak_points
+                ),
+                games=dict(self.games),
+                sets=dict(self.sets),
+            )
 
             self._award_set(
                 player
