@@ -1,0 +1,9 @@
+shot_id,video,rally_id,start_frame,end_frame,center_frame,duration_sec,suggested_player,label,confidence,labeled_by,notes
+shot_0000,tennis_match3.mp4,0,0,15,0,0.5,player_a,unlabeled,,,
+shot_0001,tennis_match3.mp4,0,30,60,45,1.0,player_a,unlabeled,,,
+shot_0002,tennis_match3.mp4,1,142,157,142,0.5,player_a,unlabeled,,,
+shot_0003,tennis_match3.mp4,1,172,202,187,1.0,player_a,unlabeled,,,
+shot_0004,tennis_match3.mp4,1,217,247,232,1.0,player_a,unlabeled,,,
+shot_0005,tennis_match3.mp4,1,262,292,277,1.0,player_a,unlabeled,,,
+shot_0006,tennis_match3.mp4,1,307,337,322,1.0,player_a,unlabeled,,,
+shot_0007,tennis_match3.mp4,1,352,377,367,0.8333333333333334,player_a,unlabeled,,,

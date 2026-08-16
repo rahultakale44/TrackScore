@@ -1,0 +1,211 @@
+{
+  "video": "tennis_match3.mp4",
+  "resolution": "1760x984",
+  "keypoints": [
+    {
+      "index": 0,
+      "abbr": "FBL",
+      "name": "Far Baseline LEFT corner",
+      "image_coords": [
+        544.0,
+        261.0
+      ],
+      "court_coords": [
+        -4.115,
+        23.77
+      ]
+    },
+    {
+      "index": 1,
+      "abbr": "FBR",
+      "name": "Far Baseline RIGHT corner",
+      "image_coords": [
+        1221.0,
+        262.0
+      ],
+      "court_coords": [
+        4.115,
+        23.77
+      ]
+    },
+    {
+      "index": 2,
+      "abbr": "FSSL",
+      "name": "Far Service line LEFT end",
+      "image_coords": [
+        599.0,
+        330.0
+      ],
+      "court_coords": [
+        -4.115,
+        18.285
+      ]
+    },
+    {
+      "index": 3,
+      "abbr": "FSSR",
+      "name": "Far Service line RIGHT end",
+      "image_coords": [
+        1164.0,
+        332.0
+      ],
+      "court_coords": [
+        4.115,
+        18.285
+      ]
+    },
+    {
+      "index": 4,
+      "abbr": "FCSL",
+      "name": "Far Center Service line T-junction",
+      "image_coords": [
+        881.0,
+        332.0
+      ],
+      "court_coords": [
+        0.0,
+        18.285
+      ]
+    },
+    {
+      "index": 5,
+      "abbr": "NL",
+      "name": "Net LEFT post",
+      "image_coords": [
+        484.0,
+        432.0
+      ],
+      "court_coords": [
+        -4.115,
+        11.885
+      ]
+    },
+    {
+      "index": 6,
+      "abbr": "NR",
+      "name": "Net RIGHT post",
+      "image_coords": [
+        1280.0,
+        433.0
+      ],
+      "court_coords": [
+        4.115,
+        11.885
+      ]
+    },
+    {
+      "index": 7,
+      "abbr": "NC",
+      "name": "Net CENTER",
+      "image_coords": [
+        882.0,
+        431.0
+      ],
+      "court_coords": [
+        0.0,
+        11.885
+      ]
+    },
+    {
+      "index": 8,
+      "abbr": "NCSL",
+      "name": "Near Center Service line T-junction",
+      "image_coords": [
+        883.0,
+        576.0
+      ],
+      "court_coords": [
+        0.0,
+        5.484999999999999
+      ]
+    },
+    {
+      "index": 9,
+      "abbr": "NSSL",
+      "name": "Near Service line LEFT end",
+      "image_coords": [
+        499.0,
+        573.0
+      ],
+      "court_coords": [
+        -4.115,
+        5.484999999999999
+      ]
+    },
+    {
+      "index": 10,
+      "abbr": "NSSR",
+      "name": "Near Service line RIGHT end",
+      "image_coords": [
+        1266.0,
+        578.0
+      ],
+      "court_coords": [
+        4.115,
+        5.484999999999999
+      ]
+    },
+    {
+      "index": 11,
+      "abbr": "NBL",
+      "name": "Near Baseline LEFT corner",
+      "image_coords": [
+        273.0,
+        744.0
+      ],
+      "court_coords": [
+        -4.115,
+        0.0
+      ]
+    },
+    {
+      "index": 12,
+      "abbr": "NBR",
+      "name": "Near Baseline RIGHT corner",
+      "image_coords": [
+        1495.0,
+        749.0
+      ],
+      "court_coords": [
+        4.115,
+        0.0
+      ]
+    },
+    {
+      "index": 13,
+      "abbr": "NBC",
+      "name": "Near Baseline CENTER",
+      "image_coords": [
+        888.0,
+        743.0
+      ],
+      "court_coords": [
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "homography_matrix": [
+    [
+      0.024462207238585682,
+      -8.363426876341595e-05,
+      -21.534424717469513
+    ],
+    [
+      0.0004216534056695925,
+      -0.08844164966738356,
+      65.54158303410483
+    ],
+    [
+      5.85221712355528e-06,
+      0.0030319387635337966,
+      1.0
+    ]
+  ],
+  "reprojection_error_meters": 0.3753461539745331,
+  "court_dimensions": {
+    "length_m": 23.77,
+    "width_m": 8.23,
+    "type": "singles"
+  }
+}
