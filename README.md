@@ -6,7 +6,7 @@ TrackScore is a command-line Python system for analyzing tennis match videos, pr
 
 ---
 
-## 🎯 Overview
+## Overview
 
 TrackScore automates tennis match analysis by:
 - Detecting and tracking players throughout the match
@@ -18,7 +18,7 @@ TrackScore automates tennis match analysis by:
 - Tracking live match scores (points, games, sets)
 - Rendering professional video overlays with analytics
 
-**⚠️ Limitations & Disclaimers:**
+** Limitations & Disclaimers:**
 - Ball speed estimates are court-plane projections from monocular video, not true 3D velocities
 - Bounce detection and IN/OUT classification depend on tracking quality and court calibration accuracy
 - Shot classifier requires labeled training data; demo data is synthetic and not representative of production accuracy
@@ -27,7 +27,7 @@ TrackScore automates tennis match analysis by:
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 # Basic usage
@@ -50,7 +50,7 @@ python trackscore.py video.mp4 --output outputs/my_analysis.mp4
 
 ---
 
-## 🎾 Features
+##  Features
 
 ### Computer Vision Pipeline
 - **Player Detection & Tracking**: YOLO11-based person detection with stable ID assignment
@@ -79,7 +79,7 @@ python trackscore.py video.mp4 --output outputs/my_analysis.mp4
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 ```mermaid
 graph TB
@@ -150,7 +150,7 @@ graph TB
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 TrackScore/
@@ -189,7 +189,7 @@ TrackScore/
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Python 3.8+** - Core language
 - **OpenCV** - Computer vision operations
@@ -200,7 +200,7 @@ TrackScore/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -243,7 +243,7 @@ python trackscore.py samples/tennis_match.mp4 --max-seconds 3 --no-preview
 
 ---
 
-## ▶️ Usage
+##  Usage
 
 ### Basic Command
 
@@ -296,7 +296,7 @@ Options:
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ### Run All Tests
 ```bash
@@ -358,7 +358,7 @@ pytest tests/test_api.py tests/test_integration.py
 
 ---
 
-## 🧠 ML Pipeline Explanation
+##  ML Pipeline Explanation
 
 ### Shot Classification Workflow
 
@@ -388,7 +388,7 @@ pytest tests/test_api.py tests/test_integration.py
    - Ensemble prediction across models
    - Shot type classification (forehand, backhand, serve, volley, etc.)
 
-**⚠️ Training Data Notice:**
+** Training Data Notice:**
 - Demo training data in `data/processed/demo_shot_dataset.csv` is **synthetic**
 - Generated for demonstration purposes only
 - Real-world accuracy requires labeled match footage
@@ -401,7 +401,7 @@ python scripts/train_shot_classifier.py
 
 ---
 
-## 👁️ Computer Vision Pipeline Explanation
+##  Computer Vision Pipeline Explanation
 
 ### 1. Video Loading & Frame Extraction
 - Load video metadata (resolution, FPS, duration)
@@ -459,7 +459,7 @@ python scripts/train_shot_classifier.py
 
 ---
 
-## ⚠️ Limitations
+##  Limitations
 
 ### Technical Constraints
 1. **Monocular Video**: Single-camera footage limits 3D reconstruction accuracy
@@ -483,7 +483,7 @@ python scripts/train_shot_classifier.py
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 ### Computer Vision
 - [ ] Multi-camera support for 3D reconstruction
@@ -523,7 +523,7 @@ python scripts/train_shot_classifier.py
 
 ---
 
-## 📊 Performance Notes
+##  Performance Notes
 
 - **Processing Speed**: ~1-3 FPS on CPU (depends on video resolution)
 - **Accuracy**: Varies with video quality; best with HD+ footage from elevated angles
@@ -532,19 +532,19 @@ python scripts/train_shot_classifier.py
 
 ---
 
-## 📄 License
+##  License
 
 This project is for educational and portfolio purposes. Not licensed for commercial use.
 
 ---
 
-## 👤 Author
+##  Author
 
 Portfolio project demonstrating full-stack development, computer vision, and machine learning integration.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Ultralytics YOLO11** for object detection models
 - **OpenCV** for computer vision foundations
@@ -554,4 +554,4 @@ Portfolio project demonstrating full-stack development, computer vision, and mac
 
 ---
 
-**⚠️ Final Disclaimer**: TrackScore is a research and portfolio project. It is not intended for professional match officiating, certified line calling, or any use where accuracy is critical. All analytics are estimates and should be validated with proper equipment and methodology for any serious application.
+** Final Disclaimer**: TrackScore is a research and portfolio project. It is not intended for professional match officiating, certified line calling, or any use where accuracy is critical. All analytics are estimates and should be validated with proper equipment and methodology for any serious application.
